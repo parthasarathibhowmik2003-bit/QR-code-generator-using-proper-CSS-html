@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="ocean">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator - Themed</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔳 QR Code Generator</h1>
+        <p class="subtitle">Choose a theme and create your QR code</p>
+
+        <!-- Theme Selector -->
+        <div class="theme-selector">
+            <button class="theme-btn active" data-theme="ocean" onclick="setTheme('ocean')">🌊 Ocean</button>
+            <button class="theme-btn" data-theme="sunset" onclick="setTheme('sunset')">🌅 Sunset</button>
+            <button class="theme-btn" data-theme="forest" onclick="setTheme('forest')">🌲 Forest</button>
+            <button class="theme-btn" data-theme="midnight" onclick="setTheme('midnight')">🌙 Midnight</button>
+            <button class="theme-btn" data-theme="cherry" onclick="setTheme('cherry')">🌸 Cherry</button>
+            <button class="theme-btn" data-theme="golden" onclick="setTheme('golden')">✨ Golden</button>
+            <button class="theme-btn" data-theme="neon" onclick="setTheme('neon')">💜 Neon</button>
+            <button class="theme-btn" data-theme="mint" onclick="setTheme('mint')">🌿 Mint</button>
+        </div>
+
+        <!-- Type Selector -->
+        <div class="type-selector">
+            <button class="type-btn active" onclick="switchType('url')">🔗 URL</button>
+            <button class="type-btn" onclick="switchType('text')">📝 Text</button>
+            <button class="type-btn" onclick="switchType('wifi')">📶 WiFi</button>
+            <button class="type-btn" onclick="switchType('email')">📧 Email</button>
+            <button class="type-btn" onclick="switchType('phone')">📱 Phone</button>
+        </div>
+
+        <!-- URL Input -->
+        <div id="url-section" class="input-section active">
+            <div class="input-group">
+                <label for="url-input">Website URL</label>
+                <input type="url" id="url-input" placeholder="https://example.com" value="https://kimi.com">
+            </div>
+        </div>
+
+        <!-- Text Input -->
+        <div id="text-section" class="input-section">
+            <div class="input-group">
+                <label for="text-input">Text Content</label>
+                <textarea id="text-input" placeholder="Enter your text here..."></textarea>
+            </div>
+        </div>
+
+        <!-- WiFi Input -->
+        <div id="wifi-section" class="input-section">
+            <div class="input-group">
+                <label for="wifi-ssid">Network Name (SSID)</label>
+                <input type="text" id="wifi-ssid" placeholder="WiFi Network Name">
+            </div>
+            <div class="input-group">
+                <label for="wifi-password">Password</label>
+                <input type="text" id="wifi-password" placeholder="WiFi Password">
+            </div>
+            <div class="input-group">
+                <label for="wifi-encryption">Encryption</label>
+                <select id="wifi-encryption">
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">No Password</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Email Input -->
+        <div id="email-section" class="input-section">
+            <div class="input-group">
+                <label for="email-address">Email Address</label>
+                <input type="email" id="email-address" placeholder="someone@example.com">
+            </div>
+            <div class="input-group">
+                <label for="email-subject">Subject</label>
+                <input type="text" id="email-subject" placeholder="Email Subject">
+            </div>
+            <div class="input-group">
+                <label for="email-body">Message</label>
+                <textarea id="email-body" placeholder="Email body text..."></textarea>
+            </div>
+        </div>
+
+        <!-- Phone Input -->
+        <div id="phone-section" class="input-section">
+            <div class="input-group">
+                <label for="phone-number">Phone Number</label>
+                <input type="tel" id="phone-number" placeholder="+1234567890">
+            </div>
+        </div>
+
+        <!-- Color Options -->
+        <div class="options">
+            <div class="input-group">
+                <label>QR Color</label>
+                <div class="color-input">
+                    <input type="color" id="qr-color" value="#000000">
+                    <span>Foreground</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Background</label>
+                <div class="color-input">
+                    <input type="color" id="bg-color" value="#ffffff">
+                    <span>Background</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Size Slider -->
+        <div class="input-group">
+            <div class="slider-label">
+                <span>Size</span>
+                <span id="size-value">256px</span>
+            </div>
+            <input type="range" id="qr-size" class="size-slider" min="128" max="512" value="256" step="32" oninput="updateSizeLabel(this.value)">
+        </div>
+
+        <!-- Generate Button -->
+        <button class="btn" onclick="generateQR()">Generate QR Code</button>
+
+        <!-- QR Result -->
+        <div id="qr-result" class="qr-result">
+            <div id="qrcode"></div>
+            <button class="btn btn-secondary" onclick="downloadQR()">⬇️ Download QR Code</button>
+        </div>
+
+        <div class="footer">
+            Generated with QR Code Generator • Choose your favorite theme!
+        </div>
+    </div>
+
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <script>
+        let currentQR = null;
+
+        function setTheme(themeName) {
+            // Update HTML data attribute
+            document.documentElement.setAttribute('data-theme', themeName);
+            
+            // Update active button state
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-theme') === themeName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Regenerate QR if exists
+            if (document.getElementById('qr-result').classList.contains('active')) {
+                setTimeout(generateQR, 300);
+            }
+        }
+
+        function switchType(type) {
+            // Update type buttons
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show corresponding section
+            document.querySelectorAll('.input-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(type + '-section').classList.add('active');
+        }
+
+        function updateSizeLabel(value) {
+            document.getElementById('size-value').textContent = value + 'px';
+        }
+
+        function getQRData() {
+            const activeType = document.querySelector('.type-btn.active').textContent.trim();
+            
+            switch(activeType) {
+                case '🔗 URL':
+                    return document.getElementById('url-input').value;
+                    
+                case '📝 Text':
+                    return document.getElementById('text-input').value;
+                    
+                case '📶 WiFi':
+                    const ssid = document.getElementById('wifi-ssid').value;
+                    const password = document.getElementById('wifi-password').value;
+                    const encryption = document.getElementById('wifi-encryption').value;
+                    return `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+                    
+                case '📧 Email':
+                    const email = document.getElementById('email-address').value;
+                    const subject = document.getElementById('email-subject').value;
+                    const body = document.getElementById('email-body').value;
+                    return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    
+                case '📱 Phone':
+                    return `tel:${document.getElementById('phone-number').value}`;
+                    
+                default:
+                    return '';
+            }
+        }
+
+        function generateQR() {
+            const data = getQRData();
+            
+            if (!data) {
+                alert('Please enter some data to generate a QR code');
+                return;
+            }
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            const size = parseInt(document.getElementById('qr-size').value);
+            const color = document.getElementById('qr-color').value;
+            const bgColor = document.getElementById('bg-color').value;
+
+            currentQR = new QRCode(qrContainer, {
+                text: data,
+                width: size,
+                height: size,
+                colorDark: color,
+                colorLight: bgColor,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            document.getElementById('qr-result').classList.add('active');
+        }
+
+        function downloadQR() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                const link = document.createElement('a');
+                link.download = 'qrcode.png';
+                link.href = qrCanvas.toDataURL();
+                link.click();
+            }
+        }
+
+        // Generate default QR on load
+        window.addEventListener('load', function() {
+            generateQR();
+        });
+    </script>
+</body>
+</html>
